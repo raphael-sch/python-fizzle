@@ -12,9 +12,9 @@ def dl_distance(s1,
                 secondHalfDiscount=False):
     """
     Return DL distance between s1 and s2. Default cost of substitution, insertion, deletion and transposition is 1
-    substitutions is list of tuples of characters (what, substituted by what, cost), 
-    maximal value of substitution is 2 (ie: cost deletion & insertion that would be otherwise used)
-    eg: substitutions=[('a','e',0.4),('i','y',0.3)]
+    substitutions is list of tuples of characters (what, substituted by what, cost) or dictionary 
+    {(what, substituted by what):cost}, maximal value of substitution is 2 (ie: cost deletion & insertion that
+    would be otherwise used) eg: substitutions=[('a','e',0.4),('i','y',0.3)] or {('a','e'):0.4, ('i','y'):0.3}
     symetric=True mean that cost of substituting A with B is same as B with A
     returnMatrix=True: the matrix of distances will be returned, if returnMatrix==False, then only distance will be returned
     printMatrix==True: matrix of distances will be printed
@@ -23,9 +23,6 @@ def dl_distance(s1,
 
     if isinstance(substitutions, list):
         subs_dict = {(from_, to): cost for from_, to, cost in substitutions}
-        if symetric:
-            subs_dict.update({(to, from_)
-                              for from_, to, cost in substitutions})
         substitutions = subs_dict
 
     if nonMatchingEnds:
@@ -39,13 +36,13 @@ def dl_distance(s1,
     for i in range(len(s1)):
         for j in range(len(s2)):
             ch1, ch2 = s1[i], s2[j]
+            cost = 1
             if ch1 == ch2:
                 cost = 0
-            else:
-                if (ch1, ch2) in substitutions:
-                    cost = substitutions[(ch1, ch2)]
-                else:
-                    cost = 1
+            elif (ch1, ch2) in substitutions:
+                cost = substitutions[(ch1, ch2)]
+            elif symetric and (ch2, ch1) in substitutions:
+                cost = substitutions[(ch2, ch1)]
             if secondHalfDiscount and (s1 > half1 or s2 > half2):
                 deletionCost, insertionCost = 0.6, 0.6
             else:
